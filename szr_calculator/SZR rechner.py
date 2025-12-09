@@ -1,6 +1,27 @@
 import tkinter as tk
 from tkinter import messagebox
+import requests # Neu: Für den Internet-Abruf
 
+def hole_aktuellen_szr_kurs():
+    """
+    Versucht, den aktuellen XDR (SZR) zu EUR Kurs zu holen.
+    Gibt den Kurs als String zurück oder None, wenn es nicht klappt.
+    """
+    url = "https://open.er-api.com/v6/latest/XDR" # Kostenlose API
+    
+    try:
+        # Der "Anruf" bei der API
+        antwort = requests.get(url, timeout=2) # Max 2 Sekunden warten
+        
+        # Prüfen ob Antwort "OK" (Status 200) ist
+        if antwort.status_code == 200:
+            daten = antwort.json() # Die Antwort in ein Dictionary verwandeln
+            kurs = daten['rates']['EUR'] # Den Euro-Wert rausgreifen
+            return str(kurs)
+            
+    except Exception as e:
+        print(f"API-Fehler: {e}") # Nur für dich zum Debuggen
+        return None # Wenn was schiefgeht, geben wir nichts zurück
 # --- 1. DAS BACKEND (Die Logik) ---
 def berechne_haftung():
     try:
@@ -67,6 +88,16 @@ label_kurs = tk.Label(root, text="Aktueller SZR-Kurs:")
 label_kurs.pack()
 entry_kurs = tk.Entry(root)
 entry_kurs.pack(pady=5)
+
+# HIER IST DER MAGIER-TRICK:
+# Wir rufen die API und füllen das Feld automatisch!
+automatischer_kurs = hole_aktuellen_szr_kurs()
+
+if automatischer_kurs:
+    entry_kurs.insert(0, automatischer_kurs) # Schreib es ins Feld
+    label_kurs.config(text=f"Aktueller SZR-Kurs (Auto-Geladen):")
+else:
+    entry_kurs.insert(0, "1.25") # Fallback-Wert, falls Internet weg ist
 
 # Der Button
 # command=berechne_haftung verknüpft den Klick mit unserer Funktion oben
