@@ -19,7 +19,8 @@ The goal is to prepare the data for downstream tasks like **Lead Time Analysis**
 
 Upon exploratory data analysis (EDA), several critical data quality issues were identified that would break standard BI tools (PowerBI/Tableau):
 
-1.  **Logical Fallacies ("Time Travel"):** About 40% of the dataset contained negative shipping times (Shipment Date < Order Date), with errors up to -1,429 days.
+1.  **Logical Fallacies ("Time Travel" & "Zombies"):** * About 40% of the dataset contained **negative shipping times** (Shipment Date < Order Date).
+    * Extreme positive outliers were found (e.g., **1,430 days** delivery time for standard shipping), indicating "Zombie Shipments".
 2.  **Synthetic Noise in IDs:** `Customer Id` and `Zipcode` fields contained floating-point noise (e.g., `Zip 92745.16` instead of `92745`).
 3.  **Financial Precision:** Monetary values (Prices, Sales, Profit) often had 6+ decimal places, requiring standardization.
 4.  **Inconsistent Types:** Geographic coordinates (`Latitude`/`Longitude`) were mixed with integer logic in some contexts.
@@ -41,7 +42,8 @@ The Jupyter Notebook `01_Data_Cleaning_and_Prep.ipynb` implements the following 
 
 ### 3. Logic Preservation (Quality Gate)
 * **Lead Time Calculation:** Computed `actual_shipping_days`.
-* **Anomaly Removal:** Removed ~6,000 rows containing negative lead times (logical errors) to ensure statistical integrity for KPI analysis.
+* **Anomaly Removal:** * Removed rows with **negative lead times** (physically impossible).
+    * Applied a **Plausibility Cutoff**: Removed shipments > 120 days (unrealistic for consumer goods).
 * **Destructive Cleanup:** Dropped original "dirty" columns after successful transformation to reduce memory usage.
 
 ## 🛠️ Tech Stack
