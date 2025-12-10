@@ -15,7 +15,7 @@ In international logistics (CMR convention), carrier liability is often limited 
 ## 🛠️ How to Run
 1.  Navigate to the folder:
     ```bash
-    cd szr_calculator
+    cd sdr_calculator
     ```
 2.  Install dependencies:
     ```bash
@@ -23,7 +23,7 @@ In international logistics (CMR convention), carrier liability is often limited 
     ```
 3.  Run the application:
     ```bash
-    python szr_tool.py
+    python sdr_tool.py
     ```
 
 ## 🧮 Logic
