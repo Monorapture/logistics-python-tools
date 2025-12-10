@@ -48,3 +48,20 @@ dashboard/
 ├── app.py                      # Main application logic
 ├── requirements.txt            # Python dependencies
 └── cleaned_supply_chain_data.csv # The dataset (Output from Project B)
+
+## 📊 Business Scenario & Insights
+
+> **Scenario:** The Head of Logistics asked for a review of Q1 Performance and an explanation for the corrected revenue figures.
+
+### 1. The "Revenue Drop" Explained
+After cleaning the data, the Total Revenue appears to decrease by **~300,000 €**.
+* **Cause:** The raw dataset included "Zombie Shipments" (delivery times > 4 years) and logical errors (negative shipping days).
+* **Insight:** The previous revenue figures were inflated by invalid orders. The current figure represents the **true, audit-proof financial status**.
+
+### 2. Lead Time Reality Check
+* **Metric:** Average Shipping Time is **41.9 Days**.
+* **Observation:** The histogram shows a clean distribution. Previously, extreme outliers distorted this KPI.
+* **Action:** Use 41.9 days as the reliable baseline for future forecasting.
+
+### 3. Conclusion
+The dashboard proves that **Data Quality** directly impacts Business Strategy. We are now optimizing based on reality, not on noise.
