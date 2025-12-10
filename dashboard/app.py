@@ -49,10 +49,9 @@ avg_lead_time = df_filtered['actual_shipping_days'].mean()
 kpi1, kpi2, kpi3 = st.columns(3)
 
 kpi1.metric(
-    label ='💰 Total Revenue',
-    value = f'{total_sales:,.2f}€',
-    delta = 'Global Sales' # Kleiner Text drunter
-    )
+    label="💰 Total Revenue",
+    value=f"{total_sales:,.2f} €",
+)
 
 kpi2.metric(
     label = "📦 Total Orders",
