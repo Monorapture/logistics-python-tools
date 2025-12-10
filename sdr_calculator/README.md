@@ -1,4 +1,4 @@
-# ⚖️ SZR Liability Calculator (CMR)
+# ⚖️ SDR Liability Calculator (CMR)
 
 > **Tool:** Automated calculator for transport liability based on Special Drawing Rights (SDR).
 > **Status:** ✅ Active (v1.0)
