@@ -48,7 +48,6 @@ The Jupyter Notebook `01_Data_Cleaning_and_Prep.ipynb` implements the following 
 
 * **Python 3.10+**
 * **Pandas:** For high-performance data manipulation and ETL.
-* **NumPy:** For numerical operations and handling NaNs.
 * **Jupyter Notebook:** For interactive development and documentation.
 
 ## 🚀 How to Run
