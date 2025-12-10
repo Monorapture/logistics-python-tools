@@ -14,7 +14,7 @@ This repository is organized into specific modules:
 
 | Tool | Description | Stack | Status |
 | :--- | :--- | :--- | :--- |
-| **[SZR Calculator](./szr_calculator)** | Automates liability calculations based on CMR/SZR regulations. Compares weight-based liability vs. goods value to identify insurance risks. | `Python`, `Pandas` | ✅ Completed (v1.0) |
+| **[SDR Calculator](./sdr_calculator)** | Automates liability calculations based on CMR/SZR regulations. Compares weight-based liability vs. goods value to identify insurance risks. | `Python`, `Pandas` | ✅ Completed (v1.0) |
 | **[Data Cleaning Pipeline](./data_cleaning)** | A robust ETL script to clean "dirty" logistics data (e.g., fixing formats, handling missing values, standardizing units) using RegEx and Pandas. | `Python`, `RegEx` | ✅ Completed (v1.0) |
 | **[Supply Chain Dashboard](./dashboard)** | *(Coming Soon)* An interactive dashboard to visualize key supply chain metrics like delivery times and carrier performance. | `Streamlit`, `PowerBI` | 📅 Planned |
 
