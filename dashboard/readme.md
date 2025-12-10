@@ -48,6 +48,7 @@ dashboard/
 ├── app.py                      # Main application logic
 ├── requirements.txt            # Python dependencies
 └── cleaned_supply_chain_data.csv # The dataset (Output from Project B)
+```
 
 ## 📊 Business Scenario & Insights
 
