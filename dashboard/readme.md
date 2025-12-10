@@ -1,6 +1,6 @@
 # 🚚 Supply Chain Control Tower (Dashboard)
 
-![Dashboard Preview](./dashboard_preview.png)
+![Dashboard Preview](./)
 
 > **Interactive Analytics:** A web-based dashboard to visualize logistics performance, delivery times, and revenue trends.
 > **Status:** ✅ Active (v1.0)
