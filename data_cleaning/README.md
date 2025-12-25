@@ -1,68 +1,49 @@
-# 🧹 Supply Chain Data Cleaning Pipeline
+# 🧹 Supply Chain Data Cleaning (ETL)
 
-> **ETL Strategy:** Transforming raw, messy logistics records into reliable datasets for analysis.
+> **The Engine Room:** Transforming raw, messy logistics records into a reliable dataset for analytics.
 > **Status:** ✅ Completed (v1.0)
 
-## 🎯 Project Objective
-In logistics analysis, the principle **"Garbage In, Garbage Out"** applies. This project builds a robust **Data Cleaning Pipeline** using Python and Pandas to sanitize a raw dataset containing supply chain shipment information.
+## 🎯 The Objective
+In logistics analysis, the principle **"Garbage In, Garbage Out"** applies strictly. Before any dashboarding or machine learning can happen, the raw data must be sanitized.
 
-The goal is to prepare the data for downstream tasks like **Lead Time Analysis** (KPI Calculation) and **Delivery Status Prediction**.
+This pipeline performs **Exploratory Data Analysis (EDA)** and **Data Cleaning** to fix critical quality issues found in the raw export.
 
-## 💾 The Dataset
+## 📂 File Structure
 
-* **Source:** Supply Chain Shipment Pricing Data
-* **Author:** Pushpit Kamboj (via Kaggle)
-* **Link:** [Kaggle Dataset](https://www.kaggle.com/datasets/pushpitkamboj/logistics-data-containing-real-world-data)
-* **Context:** The dataset contains ~15,000 rows of shipment data including order dates, shipping modes, customer segments, and delivery statuses.
+| File | Description |
+| :--- | :--- |
+| `01_Data_Cleaning_and_Prep.ipynb` | The **Jupyter Notebook** containing the cleaning logic, EDA charts, and documentation. |
+| `raw_supply_chain_data.csv` | The **Raw Input**. Contains ~15,000 rows of shipment data with errors (Negative shipping days, corrupted IDs). |
+| `metadata_columns.csv` | Dictionary describing the variables (Source: Kaggle). |
+| `cleaned_supply_chain_data.csv` | The **Golden Record** (Output). This file is consumed by the [Dashboard](../dashboard). |
 
-## 🕵️‍♂️ The Challenge: "Dirty Data"
+## 🕵️‍♂️ Detected Data Quality Issues
 
-Upon exploratory data analysis (EDA), several critical data quality issues were identified that would break standard BI tools (PowerBI/Tableau):
+During the initial EDA, several critical issues were identified that would break standard BI tools:
 
-1.  **Logical Fallacies ("Time Travel" & "Zombies"):** * About 40% of the dataset contained **negative shipping times** (Shipment Date < Order Date).
-    * Extreme positive outliers were found (e.g., **1,430 days** delivery time for standard shipping), indicating "Zombie Shipments".
-2.  **Synthetic Noise in IDs:** `Customer Id` and `Zipcode` fields contained floating-point noise (e.g., `Zip 92745.16` instead of `92745`).
-3.  **Financial Precision:** Monetary values (Prices, Sales, Profit) often had 6+ decimal places, requiring standardization.
-4.  **Inconsistent Types:** Geographic coordinates (`Latitude`/`Longitude`) were mixed with integer logic in some contexts.
-5.  **String Dates:** Temporal data (`Order Date`) was stored as object/string, preventing time-series calculation.
+### 1. "Time Travel" & Zombies 🧟
+* **Issue:** ~40% of records showed negative shipping times (Shipping Date < Order Date).
+* **Issue:** Extreme outliers (e.g., **1,430 days** delivery time) indicated "Zombie Shipments" (system errors or lost packages).
+* **Fix:** Removed physically impossible rows and applied a plausibility cutoff (> 120 days).
 
-## ⚙️ The Solution: Cleaning Pipeline
+### 2. ID Corruption 🆔
+* **Issue:** IDs for Customers and Products were stored as Floats (e.g., `12097.0`) instead of Integers.
+* **Fix:** Cast all ID columns to clean `int` types to ensure referential integrity.
 
-The Jupyter Notebook `01_Data_Cleaning_and_Prep.ipynb` implements the following cleaning logic:
-
-### 1. Ingestion & Safety
-* Loads data using `pandas`.
-* Uses `.copy()` to create a working copy, preserving raw data in memory for verification.
-
-### 2. Type Conversion & Sanitization
-* **Zip Codes:** Removal of decimal noise and padding to standard 5-digit string format (e.g., `725.0` -> `00725`).
-* **IDs:** Conversion of float-corrupted IDs (Product, Category, Customer) to clean Integers.
-* **Dates:** Parsing string columns into `datetime64[ns, UTC]` objects.
-* **Financials:** Rounding all monetary columns (Sales, Price, Discount) to 2 decimal places for accounting precision.
-
-### 3. Logic Preservation (Quality Gate)
-* **Lead Time Calculation:** Computed `actual_shipping_days`.
-* **Anomaly Removal:** * Removed rows with **negative lead times** (physically impossible).
-    * Applied a **Plausibility Cutoff**: Removed shipments > 120 days (unrealistic for consumer goods).
-* **Destructive Cleanup:** Dropped original "dirty" columns after successful transformation to reduce memory usage.
+### 3. Zip Code Standardization 📮
+* **Issue:** Zip codes contained decimal points (`725.0`) and missing leading zeros.
+* **Fix:** Padded all Zip Codes to standard 5-digit strings (e.g., `00725`).
 
 ## 🛠️ Tech Stack
-
 * **Python 3.10+**
-* **Pandas:** For high-performance data manipulation and ETL.
-* **Jupyter Notebook:** For interactive development and documentation.
+* **Pandas:** For vectorized data manipulation.
+* **NumPy:** For numerical operations.
+* **Matplotlib/Seaborn:** For visualization of outliers (Boxplots) inside the notebook.
 
-## 🚀 How to Run
-
-1.  Clone the repository.
-2.  Install dependencies:
-    ```bash
-    pip install pandas
-    ```
-3.  Open the notebook:
+## 🚀 How to Re-Run
+1.  Ensure you have the requirements installed (`pip install -r ../requirements.txt`).
+2.  Open the notebook:
     ```bash
     jupyter notebook 01_Data_Cleaning_and_Prep.ipynb
     ```
-
----
-*Created by [Kilian Sender](https://www.linkedin.com/in/kilian-sender-aa3100347/) - Aspiring Data Analyst & Supply Chain Expert.*
+3.  Run all cells to regenerate `cleaned_supply_chain_data.csv`.
