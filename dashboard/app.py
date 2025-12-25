@@ -1,100 +1,142 @@
+"""
+APPLICATION: Supply Chain Control Tower
+TYPE: Streamlit Dashboard
+AUTHOR: Kilian Sender
+
+DESCRIPTION:
+    Interactive dashboard to visualize logistics performance, 
+    shipping times, and revenue trends based on the cleaned dataset.
+"""
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import os
 
-# 1. PAGE CONFIG (Muss immer oben stehen)
+# ==============================================================================
+# 1. CONFIGURATION & PATHS
+# ==============================================================================
 st.set_page_config(
     page_title="Supply Chain Tower",
     page_icon="🚛",
     layout="wide"
 )
 
-# 2. TITEL & HEADER
-st.title("🚛 Supply Chain Control Tower")
-st.markdown("---") #Trennlinie
+# Robust path handling: Finds the CSV relative to THIS script file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(BASE_DIR, "cleaned_supply_chain_data.csv")
 
-# 3. DATEN LADEN (Cached)
+# ==============================================================================
+# 2. DATA LOADING (Cached for Performance)
+# ==============================================================================
 @st.cache_data
 def load_data():
-    df = pd.read_csv("cleaned_supply_chain_data.csv")
+    """Loads and preprocesses the CSV data."""
+    if not os.path.exists(DATA_FILE):
+        st.error(f"CRITICAL ERROR: Data file not found at {DATA_FILE}")
+        st.stop()
+        
+    df = pd.read_csv(DATA_FILE)
     
-    # KORREKTUR HIER: Runde Klammern (Funktion) und df[...] (Spalte)
+    # Convert date columns to datetime objects
     df['order_date'] = pd.to_datetime(df['order_date'])
     df['shipping_date'] = pd.to_datetime(df['shipping_date'])
+    
     return df
 
-df = load_data()
+# Load data initially
+try:
+    df_raw = load_data()
+except Exception as e:
+    st.error(f"Failed to load data: {e}")
+    st.stop()
 
+
+# ==============================================================================
+# 3. SIDEBAR & FILTERS
+# ==============================================================================
 st.sidebar.header('🔍 Filter Options')
 
-# Filter 1: Region (Market)
-# Wir holen uns alle einzigartigen Regionen aus der Spalte 'market'
-all_markets = sorted(df['market'].unique())
+# Filter: Region (Market)
+all_markets = sorted(df_raw['market'].unique())
 selected_market = st.sidebar.multiselect(
     "Select Market/Region",
-    options = all_markets,
-    default = all_markets # Standardauswahl (alle)
+    options=all_markets,
+    default=all_markets
 )
 
-# Filter anwenden: Wir filtern den DataFrame basierend auf der Auswahl
-df_filtered = df[df['market'].isin(selected_market)]
+# Apply Filters
+if not selected_market:
+    st.warning("Please select at least one market to display data.")
+    st.stop()
 
-# --- KPI SECTION (Die großen Zahlen) ---
-# Wir berechnen die Kennzahlen basierend auf den GEFILTERTEN Daten
+df_filtered = df_raw[df_raw['market'].isin(selected_market)]
+
+
+# ==============================================================================
+# 4. MAIN DASHBOARD LAYOUT
+# ==============================================================================
+st.title("🚛 Supply Chain Control Tower")
+st.markdown("---")
+
+# --- SECTION A: KPI METRICS ---
+# Calculate Key Metrics based on filtered data
 total_sales = df_filtered['sales'].sum()
 total_orders = len(df_filtered)
 avg_lead_time = df_filtered['actual_shipping_days'].mean()
 
-# Layout 3: Spalten nebeneinander
-kpi1, kpi2, kpi3 = st.columns(3)
+col1, col2, col3 = st.columns(3)
 
-kpi1.metric(
+col1.metric(
     label="💰 Total Revenue",
-    value=f"{total_sales:,.2f} €",
+    value=f"{total_sales:,.2f} €"
 )
 
-kpi2.metric(
-    label = "📦 Total Orders",
-    value = total_orders
-    )
-
-kpi3.metric(
-    label = '⏱️ Avg. Shipping Days',
-    value = f'{avg_lead_time:,.1f} Days',
-    delta_color = 'inverse' # Rot wäre schlecht (hier neutral)
-    )
-
-st.markdown('---') # Trennlinie
-
-# Layout 2: Spalten für Grafiken
-chart_col1, chart_col2, = st.columns(2)
-
-# Chart 1: Umsatz über Zeit (Line Chart)
-# Wir gruppieren nach Datum (Monat)
-sales_over_time = df_filtered.resample('M', on='order_date')['sales'].sum().reset_index()
-
-fig_sales = px.line(
-    sales_over_time,
-    x='order_date',
-    y='sales',
-    title='📈 Revenue Trend over Time',
-    template='plotly_dark' # Dunkles Design
+col2.metric(
+    label="📦 Total Orders",
+    value=total_orders
 )
 
-chart_col1.plotly_chart(fig_sales, use_container_width=True)
+col3.metric(
+    label="⏱️ Avg. Shipping Days",
+    value=f"{avg_lead_time:,.1f} Days",
+    help="Target: < 5 Days" # Tooltip for context
+)
 
-# Chart 2: Lieferzeit Verteilung (Histogram)
-fig_days = px.histogram(
-    df_filtered,
-    x='actual_shipping_days',
-    nbins=20,
-    title='🚚 Distribution of Shipping Days',
-    color_discrete_sequence=['#00CC96'], # Nices Grün
-    template='plotly_dark'
-) 
+st.markdown("---")
 
-chart_col2.plotly_chart(fig_days, use_container_width=True)
+# --- SECTION B: CHARTS ---
+chart_col1, chart_col2 = st.columns(2)
 
-# --- Daten Tabelle (Unten zum Aufklappen) ---
-with st.expander('📂 View Raw Data'):
-    st.dataframe(df_filtered)
+# Chart 1: Revenue over Time (Line Chart)
+with chart_col1:
+    st.subheader("📈 Revenue Trend")
+    # Group by month for cleaner visualization
+    sales_over_time = df_filtered.resample('M', on='order_date')['sales'].sum().reset_index()
+    
+    fig_sales = px.line(
+        sales_over_time,
+        x='order_date',
+        y='sales',
+        template='plotly_dark',
+        markers=True
+    )
+    fig_sales.update_layout(xaxis_title="Date", yaxis_title="Revenue (€)")
+    st.plotly_chart(fig_sales, use_container_width=True)
+
+# Chart 2: Shipping Days Distribution (Histogram)
+with chart_col2:
+    st.subheader("🚚 Lead Time Distribution")
+    fig_hist = px.histogram(
+        df_filtered,
+        x="actual_shipping_days",
+        nbins=20,
+        color_discrete_sequence=['#636EFA'],
+        template='plotly_dark'
+    )
+    fig_hist.update_layout(xaxis_title="Days to Ship", yaxis_title="Count of Orders")
+    st.plotly_chart(fig_hist, use_container_width=True)
+
+# --- FOOTER ---
+st.markdown("---")
+st.caption(f"Data Source: {os.path.basename(DATA_FILE)} | Records displayed: {len(df_filtered)}")
